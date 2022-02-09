@@ -11,7 +11,6 @@ final Color ACCENT_COLOUR = Color(0xFF7363d7);
 final Color CHECKBOX_COLOUR = Color(0xFF42ca99);
 final Color BACKGROUND_COLOUR = Color(0xFFCDCDCD);
 
-final isButtonEnabledProvider = StateProvider<bool>((_) => false);
 final newProductProvider = StateProvider<String>((_) => '');
 
 final productListProvider = StateNotifierProvider<ProductList, List<Product>>((ref) {
@@ -19,6 +18,7 @@ final productListProvider = StateNotifierProvider<ProductList, List<Product>>((r
     Product(id: 'todo-0', item: 'item 2'),
     Product(id: 'todo-2', item: 'item 3'),
   ]);
+  // return ProductList([]);
 });
 
 class MyApp extends StatelessWidget {
@@ -75,6 +75,7 @@ class Home extends ConsumerWidget {
       ),
     );
   }
+
   Future showAlertDialog(BuildContext context, WidgetRef ref) {
     return showDialog(
       context: context,
@@ -91,7 +92,10 @@ class Home extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, 'Cancel'),
+              onPressed: () {
+                ref.read(newProductProvider.state).state = '';
+                Navigator.pop(context, 'Cancel');
+              },
               child: Text('Cancel', style: TextStyle(color: ACCENT_COLOUR),),
             ),
             ElevatedButton(
@@ -101,8 +105,13 @@ class Home extends ConsumerWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0))
               ),
               onPressed: () {
-                ref.read(productListProvider.notifier).add(ref.read(newProductProvider.state).state);
-                Navigator.pop(context);
+                if (ref.read(newProductProvider.state).state.length > 0) {
+                  ref.read(productListProvider.notifier).add(ref.read(newProductProvider.state).state);
+                  ref.read(newProductProvider.state).state = '';
+                  Navigator.pop(context);
+                } else {
+                  return null;
+                }
               },
               child: Text('Confirm'),
             )
